@@ -7,11 +7,11 @@
 
 import SwiftUI
 
-struct JSONNodeView: View {
+public struct JSONNodeView: View {
     var node: JSONNode
     var level: Int
     @State var expanded: [String: Bool]
-    var body: some View {
+    public var body: some View {
         VStack {
             if node.isExpandable {
                 VStack(alignment: .trailing) {

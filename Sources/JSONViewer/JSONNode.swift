@@ -7,43 +7,41 @@
 
 import Foundation
 
-enum JSONNodeType {
+public enum JSONNodeType {
     case object
     case array
     case other
 }
 
-var str = "".jsonNode
-
-struct JSONNode: Identifiable, Hashable, Sequence {
+public struct JSONNode: Identifiable, Hashable, Sequence {
     
-    static func == (lhs: JSONNode, rhs: JSONNode) -> Bool {
+    public static func == (lhs: JSONNode, rhs: JSONNode) -> Bool {
         return lhs.id == rhs.id
     }
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
     
-    init(key: String, value: String, children: [JSONNode]) {
+    public init(key: String, value: String, children: [JSONNode]) {
         self.key = key
         self.value = value
         self.children = children
     }
     
-    let id = UUID()
-    var key: String
-    let value: String
-    var children: [JSONNode]
-    var type: JSONNodeType = .other
+    public let id = UUID()
+    public var key: String
+    public let value: String
+    public var children: [JSONNode]
+    public var type: JSONNodeType = .other
     
-    var isExpandable: Bool {
+    public var isExpandable: Bool {
         return !children.isEmpty
     }
     
-    typealias Iterator = Array<JSONNode>.Iterator
+    public typealias Iterator = Array<JSONNode>.Iterator
     
-    func makeIterator() -> Iterator {
+    public func makeIterator() -> Iterator {
         return children.makeIterator()
     }
 }

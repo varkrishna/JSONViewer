@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension String {
+public extension String {
     var jsonNode: JSONNode? {
         if let jsonData = self.data(using: .utf8) {
             do {
