@@ -16,3 +16,6 @@ Use JSONViewer to view JSON as expandable and collapsable nodes.
  
     `JSONViewer(rootNode: rootNode)`
 
+- Demo
+
+https://github.com/varkrishna/JSONViewer/assets/13188037/c8d6a8d4-e05c-48e0-b169-f00193569d22
