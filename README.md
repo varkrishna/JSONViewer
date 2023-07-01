@@ -2,7 +2,7 @@
 
   
 
-Use JSONViewer to view JSON as expandable and collapsable nodes.
+Use JSONViewer to view JSON as expandable and collapsable nodes in your SwiftUI Project
 
 **Usage**
 
@@ -23,4 +23,4 @@ https://github.com/varkrishna/JSONViewer/assets/13188037/c8d6a8d4-e05c-48e0-b169
 - Integrate Using Swift Package Manager
 
   
-Search `https://github.com/varkrishna/JSONViewer`
+ Search `https://github.com/varkrishna/JSONViewer`
