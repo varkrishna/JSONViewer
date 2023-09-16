@@ -36,7 +36,7 @@ public struct JSONNode: Identifiable, Hashable, Sequence {
     public var type: JSONNodeType = .other
     
     public var isExpandable: Bool {
-        return !children.isEmpty
+        return type != .other
     }
     
     public typealias Iterator = Array<JSONNode>.Iterator
