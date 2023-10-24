@@ -14,6 +14,8 @@ public extension String {
                 let jsonObject = try JSONSerialization.jsonObject(with: jsonData, options: [])
                 if let jsonDict = jsonObject as? [String: Any] {
                     return self.createNode(key: "Root", value: jsonDict)
+                } else if let jsonArray = jsonObject as? [[String: Any]] {
+                    return self.createNode(key: "Root", value: jsonArray)
                 } else {
                     return nil
                 }
