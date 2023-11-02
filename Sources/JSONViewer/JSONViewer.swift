@@ -3,17 +3,17 @@ import SwiftUI
 public struct JSONViewer: View {
     @Binding var fontConfiguration: JSONViewerFontConfiguration
     private let rootNode: JSONNode
-    private let expandedNodes: [String: Bool]
+    private var initialNodeExpandStategy: InitialNodeExpandStrategy = .root
     
-    public init(rootNode: JSONNode, isRootExpanded: Bool = true) {
+    public init(rootNode: JSONNode, initialNodeExpandStategy: InitialNodeExpandStrategy = .root) {
         self.rootNode = rootNode
-        self.expandedNodes = isRootExpanded ? ["Root": true] : [:]
+        self.initialNodeExpandStategy = initialNodeExpandStategy
         self._fontConfiguration = Binding.constant(JSONViewerFontConfiguration())
     }
     
-    public init(rootNode: JSONNode, fontConfiguration: Binding<JSONViewerFontConfiguration>, isRootExpanded: Bool = true) {
+    public init(rootNode: JSONNode, fontConfiguration: Binding<JSONViewerFontConfiguration>, initialNodeExpandStategy: InitialNodeExpandStrategy = .root) {
         self.rootNode = rootNode
-        self.expandedNodes = isRootExpanded ? ["Root": true] : [:]
+        self.initialNodeExpandStategy = initialNodeExpandStategy
         self._fontConfiguration = fontConfiguration
     }
     
@@ -21,10 +21,10 @@ public struct JSONViewer: View {
         HStack {
             VStack {
                 ScrollView {
-                    JSONNodeView(node: rootNode, 
+                    JSONNodeView(node: rootNode,
                                  level: 0,
-                                 expandedNodes: self.expandedNodes,
-                                 fontConfiguration: $fontConfiguration)
+                                 fontConfiguration: $fontConfiguration,
+                                 initialNodeExpandStategy: self.initialNodeExpandStategy)
                 }
                 .scrollIndicators(.hidden)
                 Spacer()

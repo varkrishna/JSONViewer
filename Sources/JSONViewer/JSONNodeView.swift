@@ -10,14 +10,22 @@ import SwiftUI
 public struct JSONNodeView: View {
     let node: JSONNode
     let level: Int
+    private var initialNodeExpandStategy: InitialNodeExpandStrategy = .root
     @Binding var fontConfiguration: JSONViewerFontConfiguration
     @State var expandedNodes: [String: Bool]
     
-    internal init(node: JSONNode, level: Int, expandedNodes: [String: Bool], fontConfiguration: Binding<JSONViewerFontConfiguration>) {
+    internal init(node: JSONNode, level: Int, fontConfiguration: Binding<JSONViewerFontConfiguration>, initialNodeExpandStategy: InitialNodeExpandStrategy) {
         self.node = node
         self.level = level
-        self._expandedNodes = State(initialValue: expandedNodes)
         self._fontConfiguration = fontConfiguration
+        self.initialNodeExpandStategy = initialNodeExpandStategy
+        if initialNodeExpandStategy == .root && level == 0 {
+            _expandedNodes = State(initialValue: ["Root": true])
+        } else if initialNodeExpandStategy == .all {
+            _expandedNodes = State(initialValue: [node.key: true])
+        } else {
+            _expandedNodes = State(initialValue: [:])
+        }
     }
     
     public var body: some View {
@@ -37,7 +45,7 @@ public struct JSONNodeView: View {
             Circle()
                 .fill(.white)
                 .frame(width: 8, height: 8)
-            HStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 0) {
                 Text("\(node.key)")
                     .font(fontConfiguration.keyFont)
                 Text(":")
@@ -92,8 +100,8 @@ public struct JSONNodeView: View {
                 HStack() {
                     JSONNodeView(node: childNode,
                                  level: level + 1,
-                                 expandedNodes: [String : Bool](),
-                                 fontConfiguration: self.$fontConfiguration)
+                                 fontConfiguration: self.$fontConfiguration,
+                                 initialNodeExpandStategy: self.initialNodeExpandStategy)
                 }
             }
         }
@@ -119,9 +127,16 @@ public struct JSONNodeView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .buttonStyle(PlainButtonStyle())
             
-            if self.expandedNodes[node.key] ?? false {
+            if shouldShowSuccessorView() {
                 nodeSuccessorView()
             }
         }
+    }
+    
+    func shouldShowSuccessorView() -> Bool {
+        if let value = self.expandedNodes[node.key] {
+            return value
+        }
+        return false
     }
 }

@@ -27,3 +27,13 @@ public struct JSONViewerFontConfiguration {
     }
     
 }
+
+
+public enum InitialNodeExpandStrategy {
+    case none
+    case root
+    case all
+    
+//    case uptoLevel(Int)
+//    case arrayUptoLevel(Int)
+}
