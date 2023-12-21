@@ -19,6 +19,7 @@ public struct JSONNodeView: View {
         self.level = level
         self._fontConfiguration = fontConfiguration
         self.initialNodeExpandStategy = initialNodeExpandStategy
+        
         if initialNodeExpandStategy == .root && level == 0 {
             _expandedNodes = State(initialValue: ["Root": true])
         } else if initialNodeExpandStategy == .all {
@@ -31,38 +32,77 @@ public struct JSONNodeView: View {
     public var body: some View {
         VStack {
             if node.isExpandable {
-                expandableNodeView()
+                ExpandableJSONNodeView(fontConfiguration: $fontConfiguration,
+                                       node: node,
+                                       level: level,
+                                       isExpanded: isExpandedNode(),
+                                       toggleActionHandler: toggleNodeState)
             } else {
-                nonExpandableNodeView()
+                NonExpandableJSONNodeView(node: node, 
+                                          fontConfiguration: fontConfiguration,
+                                          level: level)
             }
         }
     }
     
-    func nonExpandableNodeView() -> some View {
-        HStack {
-            Spacer()
-                .frame(width: 32 * CGFloat(level))
-            Circle()
-                .fill(.white)
-                .frame(width: 8, height: 8)
-            HStack(alignment: .top, spacing: 0) {
-                Text("\(node.key)")
-                    .font(fontConfiguration.keyFont)
-                Text(":")
-                Text("\(node.value)")
-                    .font(fontConfiguration.valueFont)
+    func toggleNodeState() {
+        if let value = self.expandedNodes[node.key] {
+            self.expandedNodes[node.key] = !value
+        } else {
+            self.expandedNodes[node.key] = true
+       }
+    }
+    
+    func isExpandedNode() -> Bool {
+        guard let value = self.expandedNodes[node.key] else {
+            return false
+        }
+        return value
+    }
+
+}
+
+private struct ExpandableJSONNodeView: View {
+    @Binding var fontConfiguration: JSONViewerFontConfiguration
+    
+    let node: JSONNode
+    let level: Int
+    let isExpanded: Bool
+    let toggleActionHandler: () -> Void
+    
+    var body: some View {
+        VStack(alignment: .trailing) {
+            HStack {
+                Spacer()
+                    .frame(width: 32 * CGFloat(level))
+                Button {
+                    toggleActionHandler()
+                } label: {
+                    HStack {
+                        nodeToggleButtonIcon()
+                        expandableNodeTypeLabel()
+                        Text(node.key)
+                            .font(fontConfiguration.keyFont)
+                    }
+                }
+                Spacer()
             }
-            Spacer()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .buttonStyle(PlainButtonStyle())
+            
+            if isExpanded {
+                JSONNodeSuccessorView(fontConfiguration: $fontConfiguration, node: node, level: level)
+            }
         }
     }
     
     func nodeToggleButtonIcon() -> some View {
-        if self.expandedNodes[node.key] ?? false {
-            Image(systemName: "minus.circle.fill")
+        if isExpanded {
+            return Image(systemName: "minus.circle.fill")
                 .imageScale(.large)
                 .frame(width: 16, height: 16)
         } else {
-            Image(systemName: "plus.circle.fill")
+            return Image(systemName: "plus.circle.fill")
                 .imageScale(.large)
                 .frame(width: 16, height: 16)
         }
@@ -85,58 +125,71 @@ public struct JSONNodeView: View {
         }
         return AnyView(EmptyView())
     }
+}
+
+private struct JSONNodeSuccessorView: View {
+    @Binding var fontConfiguration: JSONViewerFontConfiguration
     
-    func toggleNodeState() {
-        if let value = self.expandedNodes[node.key] {
-            self.expandedNodes[node.key] = !value
-        } else {
-            self.expandedNodes[node.key] = true
-        }
-    }
+    let node: JSONNode
+    let level: Int
+    let initialNodeExpandStategy: InitialNodeExpandStrategy = .root
     
-    func nodeSuccessorView() -> some View {
-        VStack(alignment: .trailing) {
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 8) {
             ForEach(node.children) { childNode in
                 HStack() {
                     JSONNodeView(node: childNode,
                                  level: level + 1,
-                                 fontConfiguration: self.$fontConfiguration,
+                                 fontConfiguration: $fontConfiguration,
                                  initialNodeExpandStategy: self.initialNodeExpandStategy)
                 }
             }
         }
     }
+}
+
+private struct NonExpandableJSONNodeView: View {
+    let node: JSONNode
+    let fontConfiguration: JSONViewerFontConfiguration
+    let level: Int
     
-    func expandableNodeView() -> some View {
-        VStack(alignment: .trailing) {
-            HStack {
-                Spacer()
-                    .frame(width: 32 * CGFloat(level))
-                Button {
-                    toggleNodeState()
-                } label: {
-                    HStack {
-                        nodeToggleButtonIcon()
-                        expandableNodeTypeLabel()
-                        Text(node.key)
-                            .font(fontConfiguration.keyFont)
-                    }
-                }
-                Spacer()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .buttonStyle(PlainButtonStyle())
+    var body: some View {
+        HStack {
+            Spacer()
+                .frame(width: (32 * CGFloat(level)) + 3)
             
-            if shouldShowSuccessorView() {
-                nodeSuccessorView()
-            }
+            JSONNodeViewDot()
+                .frame(maxHeight: .infinity, alignment: .top)
+            
+            JSONNodeViewData(node: node, fontConfiguration: fontConfiguration)
+            Spacer()
         }
     }
-    
-    func shouldShowSuccessorView() -> Bool {
-        if let value = self.expandedNodes[node.key] {
-            return value
+}
+
+private struct JSONNodeViewDot: View {
+    var body: some View {
+        VStack {
+            Spacer()
+                .frame(height: 4)
+            Circle()
+                .fill(.white)
+                .frame(width: 8, height: 8)
         }
-        return false
+    }
+}
+
+private struct JSONNodeViewData: View {
+    let node: JSONNode
+    let fontConfiguration: JSONViewerFontConfiguration
+    
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            Text("\(node.key)")
+                .font(fontConfiguration.keyFont)
+            Text(":")
+            Text("\(node.value)")
+                .font(fontConfiguration.valueFont)
+        }
     }
 }
