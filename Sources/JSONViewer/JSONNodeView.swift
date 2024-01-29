@@ -188,6 +188,7 @@ private struct JSONNodeViewData: View {
             Text("\(node.key)")
                 .font(fontConfiguration.keyFont)
             Text(":")
+                .font(fontConfiguration.keyFont)
             Text("\(node.value)")
                 .font(fontConfiguration.valueFont)
         }

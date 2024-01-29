@@ -8,7 +8,8 @@
 import Foundation
 import SwiftUI
 
-public struct JSONViewerFontConfiguration {
+public struct JSONViewerFontConfiguration: Equatable {
+    
     let keyFont: Font
     let valueFont: Font
     
