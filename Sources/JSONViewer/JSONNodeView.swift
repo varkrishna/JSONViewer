@@ -100,11 +100,13 @@ private struct ExpandableJSONNodeView: View {
         if isExpanded {
             return Image(systemName: "minus.circle.fill")
                 .imageScale(.large)
-                .frame(width: 16, height: 16)
+                .font(fontConfiguration.keyFont)
+                .frame(minWidth: 16, minHeight: 16)
         } else {
             return Image(systemName: "plus.circle.fill")
                 .imageScale(.large)
-                .frame(width: 16, height: 16)
+                .font(fontConfiguration.keyFont)
+                .frame(minWidth: 16, minHeight: 16)
         }
     }
     
@@ -113,14 +115,14 @@ private struct ExpandableJSONNodeView: View {
             return AnyView(
                 Image(systemName: "curlybraces")
                     .font(fontConfiguration.keyFont)
-                    .frame(width: 16, height: 16)
+                    .frame(minWidth: 16, minHeight: 16)
             )
             
         } else if node.type == .array {
             return AnyView(
                 Text("[ ]")
                     .font(fontConfiguration.keyFont)
-                    .frame(width: 16, height: 16)
+                    .frame(minWidth: 16, minHeight: 16)
             )
         }
         return AnyView(EmptyView())
@@ -158,7 +160,7 @@ private struct NonExpandableJSONNodeView: View {
             Spacer()
                 .frame(width: (32 * CGFloat(level)) + 3)
             
-            JSONNodeViewDot()
+            JSONNodeViewDot(fontConfiguration: fontConfiguration)
                 .frame(maxHeight: .infinity, alignment: .top)
             
             JSONNodeViewData(node: node, fontConfiguration: fontConfiguration)
@@ -168,14 +170,18 @@ private struct NonExpandableJSONNodeView: View {
 }
 
 private struct JSONNodeViewDot: View {
+    let fontConfiguration: JSONViewerFontConfiguration
     var body: some View {
         VStack {
             Spacer()
                 .frame(height: 4)
-            Circle()
-                .fill(.white)
-                .frame(width: 8, height: 8)
+            Image(systemName: "circlebadge.fill")
+                .font(fontConfiguration.keyFont)
+                .frame(minWidth: 8, minHeight: 8)
         }
+        .onAppear(perform: {
+            
+        })
     }
 }
 
