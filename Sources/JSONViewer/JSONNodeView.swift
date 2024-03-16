@@ -7,19 +7,29 @@
 
 import SwiftUI
 
+public enum JSONNodeActionEvents {
+    case onDoubleTap(node: JSONNode)
+}
+
+enum JSONNodeActionInternalEvents {
+    case onToggle(node: JSONNode)
+    case onDoubleTap(node: JSONNode)
+}
+
 public struct JSONNodeView: View {
     let node: JSONNode
     let level: Int
     private var initialNodeExpandStategy: InitialNodeExpandStrategy = .root
     @Binding var fontConfiguration: JSONViewerFontConfiguration
     @State var expandedNodes: [String: Bool]
+    var actionHandler: ((JSONNodeActionEvents) -> Void)?
     
-    internal init(node: JSONNode, level: Int, fontConfiguration: Binding<JSONViewerFontConfiguration>, initialNodeExpandStategy: InitialNodeExpandStrategy) {
+    internal init(node: JSONNode, level: Int, fontConfiguration: Binding<JSONViewerFontConfiguration>, initialNodeExpandStategy: InitialNodeExpandStrategy, actionHandler: ((JSONNodeActionEvents) -> Void)? = nil) {
         self.node = node
         self.level = level
         self._fontConfiguration = fontConfiguration
         self.initialNodeExpandStategy = initialNodeExpandStategy
-        
+        self.actionHandler = actionHandler
         if initialNodeExpandStategy == .root && level == 0 {
             _expandedNodes = State(initialValue: ["Root": true])
         } else if initialNodeExpandStategy == .all {
@@ -32,11 +42,14 @@ public struct JSONNodeView: View {
     public var body: some View {
         VStack {
             if node.isExpandable {
-                ExpandableJSONNodeView(fontConfiguration: $fontConfiguration,
-                                       node: node,
-                                       level: level,
-                                       isExpanded: isExpandedNode(),
-                                       toggleActionHandler: toggleNodeState)
+                ExpandableJSONNodeView(fontConfiguration: $fontConfiguration, node: node, level: level, isExpanded: isExpandedNode()) { event in
+                    switch event {
+                        case .onToggle(let _):
+                            toggleNodeState()
+                        case .onDoubleTap(let node):
+                            actionHandler?(.onDoubleTap(node: node))
+                    }
+                }
             } else {
                 NonExpandableJSONNodeView(node: node, 
                                           fontConfiguration: fontConfiguration,
@@ -68,22 +81,24 @@ private struct ExpandableJSONNodeView: View {
     let node: JSONNode
     let level: Int
     let isExpanded: Bool
-    let toggleActionHandler: () -> Void
+    let actionHandler: (JSONNodeActionInternalEvents) -> Void
     
     var body: some View {
         VStack(alignment: .trailing) {
             HStack {
                 Spacer()
                     .frame(width: 32 * CGFloat(level))
-                Button {
-                    toggleActionHandler()
-                } label: {
-                    HStack {
-                        nodeToggleButtonIcon()
-                        expandableNodeTypeLabel()
-                        Text(node.key)
-                            .font(fontConfiguration.keyFont)
-                    }
+                HStack {
+                    nodeToggleButtonIcon()
+                        .onTapGesture {
+                            actionHandler(.onToggle(node: node))
+                        }
+                    expandableNodeTypeLabel()
+                    Text(node.key)
+                        .font(fontConfiguration.keyFont)
+                        .onTapGesture(count: 2, perform: {
+                            actionHandler(.onDoubleTap(node: node))
+                        })
                 }
                 Spacer()
             }
@@ -91,7 +106,12 @@ private struct ExpandableJSONNodeView: View {
             .buttonStyle(PlainButtonStyle())
             
             if isExpanded {
-                JSONNodeSuccessorView(fontConfiguration: $fontConfiguration, node: node, level: level)
+                JSONNodeSuccessorView(fontConfiguration: $fontConfiguration, node: node, level: level) { event in
+                    switch event {
+                        case .onDoubleTap(let node):
+                            actionHandler(.onDoubleTap(node: node))
+                    }
+                }
             }
         }
     }
@@ -135,6 +155,7 @@ private struct JSONNodeSuccessorView: View {
     let node: JSONNode
     let level: Int
     let initialNodeExpandStategy: InitialNodeExpandStrategy = .root
+    let actionHandler: (JSONNodeActionEvents) -> Void
     
     var body: some View {
         VStack(alignment: .trailing, spacing: 8) {
@@ -143,7 +164,7 @@ private struct JSONNodeSuccessorView: View {
                     JSONNodeView(node: childNode,
                                  level: level + 1,
                                  fontConfiguration: $fontConfiguration,
-                                 initialNodeExpandStategy: self.initialNodeExpandStategy)
+                                 initialNodeExpandStategy: self.initialNodeExpandStategy, actionHandler: self.actionHandler)
                 }
             }
         }
@@ -179,9 +200,6 @@ private struct JSONNodeViewDot: View {
                 .font(fontConfiguration.keyFont)
                 .frame(minWidth: 8, minHeight: 8)
         }
-        .onAppear(perform: {
-            
-        })
     }
 }
 
