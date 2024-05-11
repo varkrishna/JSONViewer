@@ -56,6 +56,19 @@ public struct JSONNodeView: View {
                                           level: level)
             }
         }
+        .contextMenu(menuItems: {
+            Button {
+                NSPasteboard.general.clearContents()
+                if !node.isExpandable {
+                    NSPasteboard.general.setString("{\"\(node.key)\": \"\(node.value)\"}", forType: .string)
+                } else {
+                    let jsonString = node.jsonString()
+                    NSPasteboard.general.setString(jsonString, forType: .string)
+                }
+            } label: {
+                Text("Copy")
+            }
+        })
     }
     
     func toggleNodeState() {

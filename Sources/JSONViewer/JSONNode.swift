@@ -44,6 +44,44 @@ public struct JSONNode: Identifiable, Hashable, Sequence {
     public func makeIterator() -> Iterator {
         return children.makeIterator()
     }
+    
+    func jsonString(isChild: Bool = false, isArrayItem: Bool = false) -> String {
+        var result = ""
+        if !isChild {
+            result += "{"
+        }
+        if !isArrayItem {
+            result += "\"\(key)\":"
+        }
+        if !children.isEmpty {
+            if type == .object {
+                result += "{"
+                for child in children {
+                    result += child.jsonString(isChild: true)
+                    result += ","
+                }
+                result.removeLast()
+                result += "}"
+            } else {
+                result += "["
+                for child in children {
+                    result += child.jsonString(isChild: true, isArrayItem: true)
+                    result += ","
+                }
+                result.removeLast()
+                result += "]"
+            }
+        }
+        else if !value.isEmpty {
+            result += "\"\(value)\""
+        }
+        
+        if !isChild {
+            result += "}"
+        }
+        
+        return result
+    }
 }
 
 
