@@ -42,9 +42,9 @@ public struct JSONNodeView: View {
     public var body: some View {
         VStack {
             if node.isExpandable {
-                ExpandableJSONNodeView(fontConfiguration: $fontConfiguration, node: node, level: level, isExpanded: isExpandedNode()) { event in
+                ExpandableJSONNodeView(fontConfiguration: $fontConfiguration, node: node, level: level, isExpanded: isExpandedNode(), initialNodeExpandStategy: initialNodeExpandStategy) { event in
                     switch event {
-                        case .onToggle(let _):
+                        case .onToggle( _):
                             toggleNodeState()
                         case .onDoubleTap(let node):
                             actionHandler?(.onDoubleTap(node: node))
@@ -94,6 +94,7 @@ private struct ExpandableJSONNodeView: View {
     let node: JSONNode
     let level: Int
     let isExpanded: Bool
+    var initialNodeExpandStategy: InitialNodeExpandStrategy
     let actionHandler: (JSONNodeActionInternalEvents) -> Void
     
     var body: some View {
@@ -119,7 +120,7 @@ private struct ExpandableJSONNodeView: View {
             .buttonStyle(PlainButtonStyle())
             
             if isExpanded {
-                JSONNodeSuccessorView(fontConfiguration: $fontConfiguration, node: node, level: level) { event in
+                JSONNodeSuccessorView(fontConfiguration: $fontConfiguration, node: node, level: level, initialNodeExpandStategy: self.initialNodeExpandStategy) { event in
                     switch event {
                         case .onDoubleTap(let node):
                             actionHandler(.onDoubleTap(node: node))
@@ -167,7 +168,7 @@ private struct JSONNodeSuccessorView: View {
     
     let node: JSONNode
     let level: Int
-    let initialNodeExpandStategy: InitialNodeExpandStrategy = .root
+    let initialNodeExpandStategy: InitialNodeExpandStrategy
     let actionHandler: (JSONNodeActionEvents) -> Void
     
     var body: some View {
