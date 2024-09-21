@@ -58,13 +58,23 @@ public struct JSONNodeView: View {
         }
         .contextMenu(menuItems: {
             Button {
+#if os(macOS)
                 NSPasteboard.general.clearContents()
                 if !node.isExpandable {
-                    NSPasteboard.general.setString("{\"\(node.key)\": \"\(node.value)\"}", forType: .string)
+                    NSPasteboard.general.setString("{\"\(node.key)\": \"\(node.value ?? "")\"}", forType: .string)
                 } else {
                     let jsonString = node.jsonString()
                     NSPasteboard.general.setString(jsonString, forType: .string)
                 }
+#elseif os(iOS)
+                UIPasteboard.general.string = nil
+                if !node.isExpandable {
+                    UIPasteboard.general.string = "{\"\(node.key)\": \"\(node.value ?? "")\"}"
+                } else {
+                    let jsonString = node.jsonString()
+                    UIPasteboard.general.string = jsonString
+                }
+#endif
             } label: {
                 Text("Copy")
             }
